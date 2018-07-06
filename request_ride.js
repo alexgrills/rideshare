@@ -1,17 +1,19 @@
 var driver_database = require('./driver_database')
+var trip = require('./trip')
+var contact_driver = require('./contact_driver')
 
-function find_driver(pickup, dropoff) {
-  driver_database.find_close_drivers(pickup, function(drivers){
-		for (var driver in drivers){
-
-		} 
+function find_driver(pickup, dropoff, callback) {
+  driver_database.find_close_driver(pickup, function(driver){
+    contact_driver.send_ride_request(driver, function(reply){
+      if(reply) {
+        trip.connect(function(connection){
+          callback(connection)
+        })
+      }else {
+        callback({'error': 'no driver available'})
+      }
+    })
 	})
-
-  //contact a close driver
-  //if they don't accept, contact a different close driver
-  //if n don't accept, failout out saying no riders are available
-  //if driver accepts, send a realtime connection and the driver's info to rider
-  return {'driver_info': {}}
 }
 
 module.exports = {
